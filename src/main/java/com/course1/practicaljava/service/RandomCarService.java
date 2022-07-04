@@ -45,6 +45,6 @@ public class RandomCarService implements CarService{
               additionalFeatures.add(ADDITIONAL_FEATURES.get(i));
           }
           var secretFeature = ThreadLocalRandom.current().nextBoolean()? "Can fly":null;
-        return  new Car(brand , color, type, price, available, firstReleaseDate,secretFeature, additionalFeatures,engine,tires);
+        return  new Car(null,brand , color, type, price, available, firstReleaseDate,secretFeature, additionalFeatures,engine,tires);
     }
 }
