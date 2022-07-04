@@ -18,6 +18,7 @@ import java.util.ArrayList;
 public class CarElasticDatasource {
 
     private static final Logger LOG = LoggerFactory.getLogger(CarElasticDatasource.class);
+
     @Autowired
     private CarElasticRepository carElasticRepository;
 
@@ -35,14 +36,15 @@ public class CarElasticDatasource {
                                 .retrieve().bodyToMono(String.class).block();
          LOG.info("End delete with response {}", response);
          var cars = new ArrayList<Car>();
-         for (int i=0;i<10000;i++){
+         for (int i=0;i<500;i++){
              cars.add(carService.generateCar());
          }
 
          carElasticRepository.saveAll(cars);
          LOG.info("Saved {} cars", carElasticRepository.count());
          Iterable<Car> carsSaved = carElasticRepository.findAll();
-         carsSaved.forEach( car -> LOG.info( "car is id={}, brand is {}", car.getId(), car.getBrand()));
+         carsSaved.forEach( car -> LOG.info( "car is id={}, brand is {}, color is {}",
+                 car.getId(), car.getBrand(), car.getColor()));
     }
 
 }
