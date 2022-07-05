@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -79,9 +80,15 @@ public class CarApi {
           return carElasticRepository.findByBrandAndColor(car.getBrand(), car.getColor());
     }
 
-    @GetMapping(value="/cars/{brand}/{color}")
-    public List<Car> findCarsByPath(@PathVariable String brand, @PathVariable String color){
-        return carElasticRepository.findByBrandAndColor(brand, color);
+    @GetMapping(path={"/cars/{brand}/{color}", "/cars/{brand}"})
+    public List<Car> findCarsByPath(@PathVariable String brand,
+                                    @PathVariable(name="color", required=false) Optional<String> color){
+        if (color.isPresent()) {
+            return carElasticRepository.findByBrandAndColor(brand, color);
+         }
+        else{
+             return carElasticRepository.findByBrand(brand);
+        }
     }
 
     @GetMapping(value = "/cars")
