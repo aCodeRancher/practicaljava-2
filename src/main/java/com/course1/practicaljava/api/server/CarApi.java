@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -94,5 +96,12 @@ public class CarApi {
     @GetMapping(value = "/cars")
     public List<Car> findCarsByParam(@RequestParam String brand, @RequestParam String color){
         return carElasticRepository.findByBrandAndColor(brand, color);
+    }
+
+    @GetMapping(value ="/cars/date")
+    public List<Car> findCarsReleaseAfter(@RequestParam(name="first_release_date") @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate firstReleaseDate){
+
+        return carElasticRepository.findByFirstReleaseAfter(firstReleaseDate);
+
     }
 }
