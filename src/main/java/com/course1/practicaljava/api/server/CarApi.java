@@ -84,9 +84,12 @@ public class CarApi {
 
     @GetMapping(path={"/cars/{brand}/{color}", "/cars/{brand}"})
     public List<Car> findCarsByPath(@PathVariable String brand,
-                                    @PathVariable(name="color", required=false) Optional<String> color){
+                                    @PathVariable(name="color", required=false) Optional<String> color,
+                                    @RequestParam(defaultValue="0")int page,
+                                    @RequestParam(defaultValue="50")int size){
+        var pageable = PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "price"));
         if (color.isPresent()) {
-            return carElasticRepository.findByBrandAndColor(brand, color);
+            return carElasticRepository.findByBrandAndColor(brand, color, pageable).getContent();
          }
         else{
              return carElasticRepository.findByBrand(brand);
