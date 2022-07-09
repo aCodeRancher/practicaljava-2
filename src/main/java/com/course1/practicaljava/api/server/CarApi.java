@@ -1,19 +1,23 @@
 package com.course1.practicaljava.api.server;
 
+import com.course1.practicaljava.api.response.ErrorResponse;
 import com.course1.practicaljava.api.server.entity.Car;
 import com.course1.practicaljava.repository.CarElasticRepository;
 import com.course1.practicaljava.service.CarService;
-import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -83,16 +87,32 @@ public class CarApi {
     }
 
     @GetMapping(path={"/cars/{brand}/{color}", "/cars/{brand}"})
-    public List<Car> findCarsByPath(@PathVariable String brand,
-                                    @PathVariable(name="color", required=false) Optional<String> color,
-                                    @RequestParam(defaultValue="0")int page,
-                                    @RequestParam(defaultValue="50")int size){
+    public ResponseEntity<Object> findCarsByPath(@PathVariable String brand,
+                                                 @PathVariable(name="color", required=false) Optional<String> color,
+                                                 @RequestParam(defaultValue="0")int page,
+                                                 @RequestParam(defaultValue="50")int size){
+
         var pageable = PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "price"));
+        var headers = new HttpHeaders();
+        headers.add(HttpHeaders.SERVER, "Spring");
+        headers.add("X-Custom-Header", "Custom Response Header");
+
         if (color.isPresent()) {
-            return carElasticRepository.findByBrandAndColor(brand, color, pageable).getContent();
+             String colorString = color.get();
+             if (StringUtils.isNumeric(colorString)){
+                var errorResponse = new ErrorResponse("Invalid color : "+ color, LocalDateTime.now());
+               // return new ResponseEntity<Object>(errorResponse, headers, HttpStatus.BAD_REQUEST);
+               return ResponseEntity.badRequest()
+                       .header("X-Custom-Header", "Custom Response Header")
+                       .header(HttpHeaders.SERVER, "Spring")
+                       .body(errorResponse);
+             }
+            var cars = carElasticRepository.findByBrandAndColor(brand, color, pageable).getContent();
+            return ResponseEntity.ok().headers(headers).body(cars);
          }
         else{
-             return carElasticRepository.findByBrand(brand);
+             var cars = carElasticRepository.findByBrand(brand);
+             return ResponseEntity.ok().headers(headers).body(cars);
         }
     }
 
