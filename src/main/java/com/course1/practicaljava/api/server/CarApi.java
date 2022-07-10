@@ -2,6 +2,7 @@ package com.course1.practicaljava.api.server;
 
 import com.course1.practicaljava.api.response.ErrorResponse;
 import com.course1.practicaljava.api.server.entity.Car;
+import com.course1.practicaljava.exception.IllegalApiParamException;
 import com.course1.practicaljava.repository.CarElasticRepository;
 import com.course1.practicaljava.service.CarService;
 import org.apache.commons.lang3.StringUtils;
@@ -117,8 +118,18 @@ public class CarApi {
     }
 
     @GetMapping(value = "/cars")
-    public List<Car> findCarsByParam(@RequestParam String brand, @RequestParam String color){
-        return carElasticRepository.findByBrandAndColor(brand, color);
+    public List<Car> findCarsByParam(@RequestParam String brand, @RequestParam String color,
+                                     @RequestParam(defaultValue="0") int page,
+                                     @RequestParam(defaultValue="10") int size){
+        if (StringUtils.isNumeric(color)){
+            throw new IllegalApiParamException("Invalid color : "+ color);
+        }
+        if (StringUtils.isNumeric(brand)){
+            throw new IllegalApiParamException(("Invalid brand : "+ brand));
+        }
+        var pageable = PageRequest.of(page, size);
+        Optional<String> colorOptional = Optional.of(color);
+        return carElasticRepository.findByBrandAndColor(brand, colorOptional, pageable).getContent();
     }
 
     @GetMapping(value ="/cars/date")
@@ -126,5 +137,13 @@ public class CarApi {
 
         return carElasticRepository.findByFirstReleaseAfter(firstReleaseDate);
 
+    }
+
+    @ExceptionHandler(value= IllegalApiParamException.class)
+    private ResponseEntity<ErrorResponse> handleIllegalApiParamException(IllegalApiParamException e){
+        var message = "Exception, " + e.getMessage();
+        LOG.warn(message);
+        var errorResponse = new ErrorResponse(message, LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }
