@@ -138,12 +138,4 @@ public class CarApi {
         return carElasticRepository.findByFirstReleaseAfter(firstReleaseDate);
 
     }
-
-    @ExceptionHandler(value= IllegalApiParamException.class)
-    private ResponseEntity<ErrorResponse> handleIllegalApiParamException(IllegalApiParamException e){
-        var message = "Exception, " + e.getMessage();
-        LOG.warn(message);
-        var errorResponse = new ErrorResponse(message, LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
 }
