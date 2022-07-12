@@ -9,3 +9,16 @@ server:
 spring:
   jackson:
     property-naming-strategy : SNAKE_CASE
+
+springdoc:
+  swagger-ui:
+    supported-submit-methods:
+      - get
+
+management:
+    metrics:
+      export:
+        elastic:
+          step: 30s
+          host: http://localhost:9200
+
