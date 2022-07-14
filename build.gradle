@@ -20,6 +20,7 @@ configurations {
 ext{
 	set('apacheCommonsLang3Version', "3.12.0")
 	set('micrometerRegistryVersion', "1.5.2")
+	set ('springdocVersion', "1.6.9")
 }
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -28,6 +29,7 @@ dependencies {
 	implementation 'org.projectlombok:lombok:1.18.20'
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 	implementation "io.micrometer:micrometer-registry-elastic:${micrometerRegistryVersion}"
+	implementation "org.springdoc:springdoc-openapi-webflux-ui:${springdocVersion}"
 	annotationProcessor 'org.projectlombok:lombok:1.18.20'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
