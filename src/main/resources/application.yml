@@ -10,10 +10,10 @@ spring:
   jackson:
     property-naming-strategy : SNAKE_CASE
 
-springdoc:
-  swagger-ui:
-    supported-submit-methods:
-      - get
+#springdoc:
+#  swagger-ui:
+ #   supported-submit-methods:
+#      - get
 
 management:
     metrics:
