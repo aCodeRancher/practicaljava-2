@@ -5,6 +5,11 @@ import com.course1.practicaljava.api.server.entity.Car;
 import com.course1.practicaljava.exception.IllegalApiParamException;
 import com.course1.practicaljava.repository.CarElasticRepository;
 import com.course1.practicaljava.service.CarService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +32,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @RequestMapping(value="/api/car/v1")
 @RestController
+@Tag(name="Car API", description="Documentation for Car API")
 public class CarApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(CarApi.class);
@@ -41,9 +47,11 @@ public class CarApi {
          return carService.generateCar();
      }
 
+     @Operation(summary="Echo car", description="Echo given car input")
      @PostMapping(value="/echo", consumes= MediaType.APPLICATION_JSON_VALUE,
                   produces = MediaType.APPLICATION_JSON_VALUE)
-     public Car echo(@RequestBody Car car){
+     public Car echo(@io.swagger.v3.oas.annotations.parameters.RequestBody (description = "car to be echoed")
+                          @RequestBody Car car){
         LOG.info("Car is {}", car);
 
         return car ;
@@ -77,9 +85,13 @@ public class CarApi {
 
      @PutMapping(value="/{id}")
      public String updateCar(@PathVariable("id") String carId, @RequestBody Car updatedCar){
-        updatedCar.setId(carId);
-        var newCar = carElasticRepository.save(updatedCar);
-        return "Updated car with ID : " + newCar.getId();
+
+        Optional<Car> carFound = carElasticRepository.findById(carId);
+        if (carFound.isPresent()) {
+            updatedCar.setId(carId);
+            carElasticRepository.save(updatedCar);
+        }
+        return "Updated car with ID : " + updatedCar.getId();
      }
 
     @GetMapping(value = "/find-json", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -88,10 +100,16 @@ public class CarApi {
     }
 
     @GetMapping(path={"/cars/{brand}/{color}", "/cars/{brand}"})
-    public ResponseEntity<Object> findCarsByPath(@PathVariable String brand,
-                                                 @PathVariable(name="color", required=false) Optional<String> color,
-                                                 @RequestParam(defaultValue="0")int page,
-                                                 @RequestParam(defaultValue="50")int size){
+    @Operation(summary = "find cars by path", description="Find cars by path variable")
+    @ApiResponses({
+                    @ApiResponse(responseCode = "200", description = "Everything is ok"),
+                     @ApiResponse(responseCode = "400", description = "Bad input parameter")
+                 })
+    public ResponseEntity<Object> findCarsByPath(
+            @Parameter(description = "Brand to be find") @PathVariable String brand,
+            @Parameter(description = "Color to be find") @PathVariable(name="color", required=false) Optional<String> color,
+            @Parameter(description = "Page number for pagination") @RequestParam(defaultValue="0")int page,
+            @Parameter(description= "Number of items per page for pagination")   @RequestParam(defaultValue="50")int size){
 
         var pageable = PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "price"));
         var headers = new HttpHeaders();
