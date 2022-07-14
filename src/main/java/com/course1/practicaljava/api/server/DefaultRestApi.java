@@ -1,4 +1,6 @@
 package com.course1.practicaljava.api.server;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -11,9 +13,11 @@ import java.time.LocalTime;
 
 @RestController
 @RequestMapping(value="/api")
+@Tag(name = "Default Rest API", description="Document for Default Rest API")
 public class DefaultRestApi {
 
     @GetMapping(value = "/welcome")
+    @Operation(summary="welcome", description="Description for welcome API")
     public String welcome() {
         System.out.println(StringUtils.join("Hello", " this is", " Spring boot", " REST API"));
         return "Welcome to Spring Boot";
